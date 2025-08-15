@@ -5,8 +5,13 @@ import cors from "cors"
 import morgan from "morgan"
 import connectMongo from "../src/config/mongodb.js"
 import cookieParser from "cookie-parser"
+import errorHandler from "../src/middlewares/errorHandler.middleware.js"
+
+
+
 const PORT = process.env.PORT || 4000
 const app = express()
+
 
 
 // PLUGIN MIDDLEWARES
@@ -20,6 +25,11 @@ app.use(morgan("dev"))
 app.use(urlencoded({extended: true}))
 app.use(cookieParser())
 app.use(json())
+
+
+// RESPONSE MIDDLEWARES
+
+app.use(errorHandler)
 
 
 app.get('/',(req,res)=>{

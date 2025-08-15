@@ -1,5 +1,5 @@
 import {z} from "zod"
-import {USER_STATUS} from "../constants/enums"
+import {USER_STATUS} from "../constants/enums.js"
 
 
 const createUserSchema = z.object({
