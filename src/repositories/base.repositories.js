@@ -4,8 +4,13 @@ class baseRepository{
         this.model = model
     }
 
-    create = async(data, session = null)=>{
+    create = async(data = {}, session = null)=>{
         const response = await this.model.create([data], session)
+        return response
+    }
+
+    findOne = async(query = {}, projection = "", session)=>{
+        const response = await this.model.findOne(query).select(projection).session(session)
         return response
     }
 
@@ -15,3 +20,6 @@ class baseRepository{
 
     
 }
+
+
+export default baseRepository

@@ -5,6 +5,11 @@ const key = process.env.CRYPTO_KEY;
 const iv = process.env.CRYPTO_IV
 
 
+export function hashEmail(email){
+    return crypto.createHash("sha256").update('email').digest('hex');
+}
+
+
 export function encryptEmail(email) {
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(email, "utf8", "hex");
