@@ -1,12 +1,14 @@
 
-import User from "../models/user.model"
-import baseRepository from "./base.repositories";
+import User from "../models/user.model.js"
+import baseRepository from "./base.repositories.js";
 
 class UserRepository extends baseRepository{
      constructor(){
         super(User)
      }
+
+     
 }
 
-
-export default UserRepository
+const userRepository = new UserRepository()
+export default userRepository

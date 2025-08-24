@@ -9,6 +9,8 @@ import errorHandler from "../src/middlewares/errorHandler.middleware.js"
 
 
 
+
+
 const PORT = process.env.PORT || 4000
 const app = express()
 
@@ -27,6 +29,17 @@ app.use(cookieParser())
 app.use(json())
 
 
+
+// IMPORT ROUTES 
+
+import authRouter from "./routes/auth.routes.js"
+
+
+app.use("/api/auth", authRouter)
+
+
+
+
 // RESPONSE MIDDLEWARES
 
 app.use(errorHandler)
@@ -34,6 +47,9 @@ app.use(errorHandler)
 
 app.get('/',(req,res)=>{
     res.send("Jai sri ram")
+
+
+
 })
 
 connectMongo().then(()=>{
