@@ -9,7 +9,12 @@ const OTP_TYPES = {
     PASSWORD_RESET: "password_reset"
 }
 
+const USER_ROLE = {
+    ADMIN : "admin",
+    USER: "user"
+}
+
 
 export {
-    USER_STATUS, OTP_TYPES
+    USER_STATUS, OTP_TYPES,  USER_ROLE
 }

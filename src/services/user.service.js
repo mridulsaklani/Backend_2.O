@@ -11,37 +11,44 @@ import userRepository from "../repositories/user.repository.js";
 
 import { hashEmail } from "../plugins/encryption.plugin.js";
 import { otpExpiry } from "../constants/constant.js";
+import { uploadProfileImage } from "../utils/cloudinary.utils.js";
 
 const projection = "-password -refreshToken"
 
 class UserService {
 
 
-  createUser = async (payload) => {
+  createUser = async (payload, image) => {
     const session = await mongoose.startSession();
 
     try {
       session.startTransaction();
 
       const hashMail = hashEmail(payload.email);
-      const isUserExist = await userRepository.findOne({ hashEmail: hashMail }, "email", session);
+      const isUserExist = await userRepository.checkUserExist({ hashEmail: hashMail, username: payload.username }, "email username", session);
+      console.log("userData: ", isUserExist)
       if (isUserExist) {
         throw new apiError(
           400,
-          "You already have an account by using this email"
+          (isUserExist.username.trim() === payload.username.trim()) ? "You already have an account by using this username" : "You already have an account by using this email"
         );
       }
       
       const otp = generateOTP()
 
-      
-
-      // await sendOtpMail(payload.email, otp, OTP_TYPES.EMAIL_VERIFICATION)
+      await sendOtpMail(payload.email, otp, OTP_TYPES.EMAIL_VERIFICATION)
 
 
       await otpRepository.create({email: payload.email, otp, types:  OTP_TYPES.EMAIL_VERIFICATION,expiration: otpExpiry }, session);
+
+      let imageUrl;
       
-      const user = await userRepository.create(payload, session)
+      if(image){
+       imageUrl =  await uploadProfileImage(image)
+      }
+
+
+      const user = await userRepository.create({...payload, profileImage: imageUrl ? imageUrl : null}, session)
 
       await session.commitTransaction()
 
@@ -122,6 +129,9 @@ class UserService {
       
     } catch (error) {
       await session.abortTransaction()
+      if(process.env.NODE_ENV === "development"){
+          console.error(error)
+        }
       throw error
     } finally{
       await session.endSession()
@@ -137,7 +147,77 @@ class UserService {
     }
   }
 
+  login = async(payload)=>{
 
+    const session = await mongoose.startSession()
+    try {
+      session.startTransaction()
+      const hashMail = hashEmail(payload.email)
+      console.error("Error")
+      const user = await userRepository.findByHashedEmail(hashMail, "-refreshToken", session );
+
+      if(!user){
+        throw new apiError(401, "Invalid email or password")
+      }
+
+      if(user.isLocked === true){
+        throw new apiError(423, "Your account is locked, please contact with owner")
+      }
+
+      if(!user.isVerified){
+        throw new apiError(403, "Please verify your email first")
+      }
+
+      
+
+      const isPasswordValid = await user.isPasswordCorrect(payload.password)
+
+      if(!isPasswordValid){
+        throw new apiError(401, "Invalid password")
+
+
+      }
+
+       const accessToken = await user.generateAccessToken()
+      const refreshToken = await user.generateRefreshToken()
+
+      const isUpdate = await userRepository.updateLastLogin(user._id, refreshToken, session)
+      if(!isUpdate){
+        throw new apiError(400, "User not logged in, data not updated")
+      }
+
+     
+
+      await session.commitTransaction()
+
+      return {_id:user._id, name: user.name, accessToken, refreshToken}
+
+
+      
+
+    } catch (error) {
+      await session.abortTransaction()
+      if(process.env.NODE_ENV === "development"){
+          console.error(error)
+        }
+      throw error
+    }
+    finally{
+      await session.endSession()
+    }
+  }
+
+   logout = async(id)=>{
+    try {
+      if(!id){
+        throw new apiError(400, "Unauthorized User")
+      }
+      await userRepository.findOneAndUpdate({_id: id}, {refreshToken: null})
+      return true
+    } catch (error) {
+      throw error
+    }
+   }
 }
 
 const userService = new UserService()

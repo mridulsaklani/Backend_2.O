@@ -6,14 +6,11 @@ import morgan from "morgan"
 import connectMongo from "../src/config/mongodb.js"
 import cookieParser from "cookie-parser"
 import errorHandler from "../src/middlewares/errorHandler.middleware.js"
-
-
-
+import { testCloudinaryConnection } from "./config/cloudinary.config.js"
 
 
 const PORT = process.env.PORT || 4000
 const app = express()
-
 
 
 // PLUGIN MIDDLEWARES
@@ -52,7 +49,13 @@ app.get('/',(req,res)=>{
 
 })
 
-connectMongo().then(()=>{
+connectMongo().then(async()=>{
+     const cloudinaryConnected = await testCloudinaryConnection();
+    
+    if (!cloudinaryConnected) {
+        console.log('Starting server without Cloudinary connection');
+    }
+   
     app.listen(PORT, ()=>console.log(`Server is starting on http://localhost:${PORT}`));
 }).catch((err)=>{
     console.log('mongoDB connection error: ', err);
