@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 import { apiError } from "../utils/apiError.utils.js";
-import mongoose from "mongoose";
+import mongoose, {Types} from "mongoose";
 import generateOTP from "../utils/otp.utils.js";
 import { sendOtpMail } from "../utils/mailer.utils.js";
 import {OTP_TYPES} from "../constants/enums.js"
@@ -149,8 +149,8 @@ class UserService {
 
   findById = async(id)=>{
     try {
-      if(!id){
-        throw new apiError(404, "User Id not found in params")
+      if(!Types.ObjectId.isValid(id)){
+        throw new apiError(404, "Invalid object id format")
       }
 
       const result = await userRepository.findOne({_id: id}, projection)
@@ -225,7 +225,7 @@ class UserService {
 
    logout = async(id)=>{
     try {
-      if(!id){
+      if(!Types.ObjectId.isValid(id)){
         throw new apiError(400, "Unauthorized User")
       }
       await userRepository.findOneAndUpdate({_id: id}, {refreshToken: null})
