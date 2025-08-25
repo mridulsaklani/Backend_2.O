@@ -147,6 +147,22 @@ class UserService {
     }
   }
 
+  findById = async(id)=>{
+    try {
+      if(!id){
+        throw new apiError(404, "User Id not found in params")
+      }
+
+      const result = await userRepository.findOne({_id: id}, projection)
+      if(!result){
+        throw new apiError(404, "Invalid user, data not found")
+      }
+      return result
+    } catch (error) {
+      throw error
+    }
+  }
+
   login = async(payload)=>{
 
     const session = await mongoose.startSession()

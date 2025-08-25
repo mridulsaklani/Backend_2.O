@@ -1,5 +1,6 @@
 import { accessTokenExpiry, refreshTokenExpiry } from "../constants/constant.js";
 import userService from "../services/user.service.js";
+import { apiError } from "../utils/apiError.utils.js";
 import { apiResponse } from "../utils/apiResponse.utils.js";
 
 class AuthController{
@@ -43,6 +44,16 @@ class AuthController{
         try {
             const result = await userService.getAllUsers()
             return res.status(200).json(new apiResponse(200, "All user get successfully", result))
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    findById = async(req,res,next)=>{
+        try {
+            const id = req.params.id;
+            const response = await userService.findById(id);
+            return res.status(200).json(new apiResponse(200, "User fetched successfully", response))
         } catch (error) {
             next(error)
         }
