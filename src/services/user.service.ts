@@ -9,7 +9,7 @@ import otpRepository from "../repositories/otp.repository";
 import UserRepository from "../repositories/user.repository";
 
 import {
-  decryptEmail,
+  decryptData,
   hashEmail,
   generateVerificationToken,
 } from "../plugins/encryption.plugin";
@@ -44,7 +44,7 @@ class UserService {
         "email username",
         session
       );
-      console.log("userData: ", isUserExist);
+      
       if (isUserExist) {
         throw new apiError(
           400,
@@ -196,9 +196,14 @@ class UserService {
 
   getAllUsers = async (): Promise<Array<UserDocument>> => {
     try {
-      const users = await userRepository.getAll({}, projection, {
+      const users: Array<UserDocument> = await userRepository.getAll({}, projection, {
         createdAt: -1,
       });
+
+      for(let item of users){
+        item.email = decryptData(item.email)
+      }
+
       return users;
     } catch (error) {
       throw error;
@@ -264,21 +269,27 @@ class UserService {
         },
         session
       );
-      console.log("verification Token: ", verificationToken.verificationToken)
+      
 
       if (!isCreated) {
         throw new apiError(400, "Verification link not saved");
       }
 
-      const verificationURL:string = `${process.env.CLIENT_URL}/verify-login?token=${verificationToken.verificationToken}&userId=${user._id}`;
+      const verificationURL:string = `${process.env.CLIENT_URL}/confirm-login?token=${verificationToken.verificationToken}&userId=${user._id}`;
 
-      const decryptedEmail:string = decryptEmail(user.email);
+      console.log("verification Token: ", verificationURL)
 
-      await sendVerificationLink(
+      const decryptedEmail:string = decryptData(user.email);
+
+      const result = await sendVerificationLink(
         decryptedEmail,
         verificationURL,
         VERIFICATION_LINK_TYPE.LOGIN
       );
+
+      if(!result){
+        throw new apiError(400, "Email send failed")
+      }
 
       await session.commitTransaction();
 
@@ -453,7 +464,7 @@ class UserService {
 
       const user = await userRepository.findById(userId, "", session);
 
-      const oldEmail = decryptEmail(user.email);
+      const oldEmail = decryptData(user.email);
       
       if (String(oldEmail).trim() === String(payload.email).trim()) {
         throw new apiError(

@@ -10,7 +10,7 @@ import {REQUEST_SOURCE} from "../constants/enums"
 
 const router = Router()
 
-router.route('/').post(upload.single("profileImage"), validate(createUserSchema), authController.createUser).get(authorize(['admin']), authController.getAllUser);
+router.route('/').post(upload.single("profileImage"), validate(createUserSchema), authController.createUser).get(authController.getAllUser);
 router.route('/single/:id').get(authorize(['admin', 'user']), authController.findById);
 router.route('/verify-user').post(validate(verifyOtpSchema), authController.verifyUser);
 router.route('/resend-otp').post(validate(resendOtpSchema), authController.resendVerificationOTP);

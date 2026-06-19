@@ -2,8 +2,8 @@ import { Schema, model } from "mongoose";
 import { USER_ROLE, USER_STATUS } from "../constants/enums";
 import bcrypt from "bcrypt";
 import {
-  encryptEmail,
-  decryptEmail,
+  encryptData,
+  decryptData,
   hashEmail,
 } from "../plugins/encryption.plugin";
 
@@ -111,12 +111,12 @@ userModel.pre("save", async function (next) {
 userModel.pre("save", async function (next) {
   if (!this.isModified("email")) return next();
   this.hashEmail = hashEmail(this.email);
-  this.email = encryptEmail(this.email);
+  this.email = encryptData(this.email);
   next();
 });
 
 userModel.methods.getDecryptEmail = async function (encryptedEmail:string): Promise<string> {
-  return decryptEmail(encryptedEmail);
+  return decryptData(encryptedEmail);
 };
 
 userModel.methods.isPasswordCorrect = async function (password:string): Promise<boolean> {

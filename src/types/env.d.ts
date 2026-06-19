@@ -1,3 +1,5 @@
+import { Algorithm } from "jsonwebtoken";
+
 declare global {
     namespace NodeJS {
         interface ProcessEnv {
@@ -22,6 +24,9 @@ declare global {
             ACCESS_TOKEN_EXPIRY: string;
             REFRESH_TOKEN_KEY: string;
             REFRESH_TOKEN_EXPIRY: string;
+
+            GLOBAL_TOKEN_KEY:string;
+            ALGORITHM:Algorithm
 
             // Cloudinary
             CLOUD_NAME: string;

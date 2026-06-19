@@ -6,7 +6,7 @@ export function hashEmail(email: string){
     return crypto.createHash("sha256").update(email).digest('hex');
 }
 
-export function encryptEmail(email: string) {
+export function encryptData(email: string) {
    const key = Buffer.from(process.env.CRYPTO_KEY, 'hex');
   const iv = Buffer.from(process.env.CRYPTO_IV, 'hex');
   
@@ -17,7 +17,7 @@ export function encryptEmail(email: string) {
   return encrypted;
 }
 
-export function decryptEmail(encryptedEmail: string) {
+export function decryptData(encryptedEmail: string) {
   const key = Buffer.from(process.env.CRYPTO_KEY, 'hex');
   const iv = Buffer.from(process.env.CRYPTO_IV, 'hex');
   

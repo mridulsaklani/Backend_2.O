@@ -12,7 +12,7 @@ import rateLimiter from "./config/rateLimiter.config";
 const app = express();
 const origin: string = process.env.CLIENT_URL || "";
 
-// PLUGIN MIDDLEWARES
+
 app.use(cors({
     origin,
     credentials: true,
@@ -24,7 +24,13 @@ app.use(cors({
 
 app.use(rateLimiter.globalRateLimit());
 app.use(helmet({
-    contentSecurityPolicy: true,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:"],
+      },
+    },
     crossOriginResourcePolicy: true
 }
 ))
@@ -35,7 +41,7 @@ app.use(json());
 
 app.use(errorHandler);
 
-console.log(globalThis)
+
 
 // IMPORT ROUTES 
 
